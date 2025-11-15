@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backtrader"
+version = "1.9.78.123"
+description = "BackTesting Engine"
+readme = "README.rst"
+requires-python = "==3.13.*"
+license = {text = "GPLv3+"}
+authors = [
+    {name = "Daniel Rodriguez", email = "danjrod@gmail.com"},
+]
+keywords = ["trading", "development"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Topic :: Software Development",
+    "Topic :: Office/Business :: Financial",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+plotting = [
+    "matplotlib>=3.10.7",
+]
+pandas = [
+    "pandas>=2.3.3",
+]
+talib = [
+    "numpy>=2.3.4",
+]
+all = [
+    "matplotlib>=3.10.7",
+    "pandas>=2.3.3",
+    "numpy>=2.3.4",
+]
+
+[project.scripts]
+btrun = "backtrader.btrun:btrun"
+
+[project.urls]
+Homepage = "https://github.com/mementum/backtrader"
+Download = "https://github.com/mementum/backtrader/tarball/1.9.78.123"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backtrader"]
+exclude = ["docs", "docs2", "samples"]
+
+[tool.hatch.build.targets.sdist]
+exclude = ["docs", "docs2", "samples"]
+

@@ -49,10 +49,45 @@ btrun = "backtrader.btrun:btrun"
 Homepage = "https://github.com/mementum/backtrader"
 Download = "https://github.com/mementum/backtrader/tarball/1.9.78.123"
 
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
 [tool.hatch.build.targets.wheel]
-packages = ["backtrader"]
+packages = ["src/backtrader"]
 exclude = ["docs", "docs2", "samples"]
 
 [tool.hatch.build.targets.sdist]
 exclude = ["docs", "docs2", "samples"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "RUF", "PERF", "TC", "PTH"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backtrader"]
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+addopts = ["-ra", "-q", "--strict-markers", "--import-mode=importlib"]
+testpaths = ["tests"]
+pythonpath = ["src"]
+xfail_strict = true
+filterwarnings = ["error"]
 

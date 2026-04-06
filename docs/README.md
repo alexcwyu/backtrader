@@ -1,5 +1,8 @@
 # Backtrader
 
+> **Last Updated**: 2026-04-06T16:25:30Z  \
+> **Git Hash**: `5c68e6d`
+
 **Full-featured backtesting framework with live trading support**
 
 - **Repository**: [github.com/mementum/backtrader](https://github.com/mementum/backtrader)

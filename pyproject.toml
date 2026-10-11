@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,7 +7,7 @@ name = "backtrader"
 version = "1.9.78.123"
 description = "BackTesting Engine"
 readme = "README.rst"
-requires-python = "==3.13.*"
+requires-python = ">=3.13,<3.16"
 license = {text = "GPLv3+"}
 authors = [
     {name = "Daniel Rodriguez", email = "danjrod@gmail.com"},
@@ -28,18 +28,18 @@ dependencies = []
 
 [project.optional-dependencies]
 plotting = [
-    "matplotlib>=3.10.7",
+    "matplotlib>=3.11.2",
 ]
 pandas = [
-    "pandas>=2.3.3",
+    "pandas>=3.0.6",
 ]
 talib = [
-    "numpy>=2.3.4",
+    "numpy>=2.5.4",
 ]
 all = [
-    "matplotlib>=3.10.7",
-    "pandas>=2.3.3",
-    "numpy>=2.3.4",
+    "matplotlib>=3.11.2",
+    "pandas>=3.0.6",
+    "numpy>=2.5.4",
 ]
 
 [project.scripts]
@@ -51,7 +51,7 @@ Download = "https://github.com/mementum/backtrader/tarball/1.9.78.123"
 
 [dependency-groups]
 dev = [
-    "pytest>=9.0",
+    "pytest>=9.1.1",
 ]
 
 [tool.uv]
@@ -84,10 +84,12 @@ pythonVersion = "3.13"
 typeCheckingMode = "basic"
 
 [tool.pytest.ini_options]
+# The existing suite is function-based; TestStrategy classes are simulation fixtures.
+python_classes = []
 minversion = "9.0"
 addopts = ["-ra", "-q", "--strict-markers", "--import-mode=importlib"]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
 xfail_strict = true
 filterwarnings = ["error"]
 

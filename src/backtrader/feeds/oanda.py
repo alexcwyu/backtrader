@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from datetime import datetime, timedelta
+from datetime import timezone, datetime, timedelta
 
 from backtrader.feed import DataBase
 from backtrader import TimeFrame, date2num, num2date
@@ -333,7 +333,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                     # passing None to fetch max possible in 1 request
                     dtbegin = None
 
-                dtend = datetime.utcfromtimestamp(int(msg['time']) / 10 ** 6)
+                dtend = datetime.fromtimestamp(int(msg['time']) / 10 ** 6, timezone.utc).replace(tzinfo=None)
 
                 self.qhist = self.o.candles(
                     self.p.dataname, dtbegin, dtend,
@@ -396,7 +396,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
                     return False
 
     def _load_tick(self, msg):
-        dtobj = datetime.utcfromtimestamp(int(msg['time']) / 10 ** 6)
+        dtobj = datetime.fromtimestamp(int(msg['time']) / 10 ** 6, timezone.utc).replace(tzinfo=None)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
             return False  # time already seen
@@ -418,7 +418,7 @@ class OandaData(with_metaclass(MetaOandaData, DataBase)):
         return True
 
     def _load_history(self, msg):
-        dtobj = datetime.utcfromtimestamp(int(msg['time']) / 10 ** 6)
+        dtobj = datetime.fromtimestamp(int(msg['time']) / 10 ** 6, timezone.utc).replace(tzinfo=None)
         dt = date2num(dtobj)
         if dt <= self.lines.datetime[-1]:
             return False  # time already seen

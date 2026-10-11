@@ -21,7 +21,7 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from datetime import datetime
+from datetime import timezone, datetime
 import itertools
 
 from .. import feed, TimeFrame
@@ -93,9 +93,9 @@ class GenericCSVData(feed.CSVDataBase):
         elif isinstance(self.p.dtformat, integer_types):
             idt = int(self.p.dtformat)
             if idt == 1:
-                self._dtconvert = lambda x: datetime.utcfromtimestamp(int(x))
+                self._dtconvert = lambda x: datetime.fromtimestamp(int(x), timezone.utc).replace(tzinfo=None)
             elif idt == 2:
-                self._dtconvert = lambda x: datetime.utcfromtimestamp(float(x))
+                self._dtconvert = lambda x: datetime.fromtimestamp(float(x), timezone.utc).replace(tzinfo=None)
 
         else:  # assume callable
             self._dtconvert = self.p.dtformat

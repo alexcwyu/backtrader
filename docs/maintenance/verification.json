@@ -1,0 +1,149 @@
+{
+  "repository": "backtrader",
+  "source_commit_before_documentation_commit": "1cc3fae65c117d7b456db6d5569c6079855b0ef0",
+  "recorded_on": "2026-10-12",
+  "records": [
+    {
+      "command": "uv build --python 3.15",
+      "exit_code": 0,
+      "seconds": 1.72,
+      "check": "build",
+      "original_log": "backtrader-build.log",
+      "log_sha256": "0640f02a4f931e310e6a20009510a6abda1f5b69b4fd24711cd48b6f0863bdf0",
+      "outcomes": [
+        "Successfully built dist/backtrader-1.9.78.123.tar.gz",
+        "Successfully built dist/backtrader-1.9.78.123-py3-none-any.whl"
+      ]
+    },
+    {
+      "command": "uv build --python 3.15",
+      "exit_code": 0,
+      "seconds": 1.31,
+      "check": "build-final",
+      "original_log": "backtrader-build-final.log",
+      "log_sha256": "0640f02a4f931e310e6a20009510a6abda1f5b69b4fd24711cd48b6f0863bdf0",
+      "outcomes": [
+        "Successfully built dist/backtrader-1.9.78.123.tar.gz",
+        "Successfully built dist/backtrader-1.9.78.123-py3-none-any.whl"
+      ]
+    },
+    {
+      "command": "/Users/alex/.local/share/uv/python/cpython-3.15-macos-aarch64-none/bin/python3.15 -m compileall -q src",
+      "exit_code": 0,
+      "seconds": 0.13,
+      "check": "compile",
+      "original_log": "backtrader-compile.log",
+      "log_sha256": "7ca2bb1f345d21a38723601ec9f65c578f3b0d70cba3528cf9b52bcbf12cbcfe",
+      "outcomes": []
+    },
+    {
+      "command": "uv run --no-sync python -m compileall -q src",
+      "exit_code": 0,
+      "seconds": 0.13,
+      "check": "compile-final",
+      "original_log": "backtrader-compile-final.log",
+      "log_sha256": "18836bd061fd2cbbcee4cfbe11a0c5bb8956a47a78decc98b17bdc695bd896a7",
+      "outcomes": []
+    },
+    {
+      "command": "uv lock --upgrade --python 3.15",
+      "exit_code": 0,
+      "seconds": 0.29,
+      "check": "lock-3.15",
+      "original_log": "backtrader-lock-3.15.log",
+      "log_sha256": "9bc9f43c5ef7d2f8c975119e6d4b07a68e84e38f3917ccac3099376ae6610f0a",
+      "outcomes": []
+    },
+    {
+      "command": "uv sync --all-extras --all-groups --python 3.15",
+      "exit_code": 0,
+      "seconds": 0.76,
+      "check": "sync-3.15",
+      "original_log": "backtrader-sync-3.15.log",
+      "log_sha256": "c6df0a7081af4ed6a72d7fae2a0aad0c546c7e3654fd2c0ac6944fb3a1fdeee0",
+      "outcomes": []
+    },
+    {
+      "command": "uv run --no-sync python -m pytest tests",
+      "exit_code": 1,
+      "seconds": 3.85,
+      "check": "tests",
+      "original_log": "backtrader-tests.log",
+      "log_sha256": "8cd180863e8fa220b115eae0fdda1fa1f38e942f25e946804bb7f06b6609f18f",
+      "outcomes": [
+        "76 failed, 6 passed in 3.24s"
+      ]
+    },
+    {
+      "command": "uv run --no-sync python -m pytest",
+      "exit_code": 0,
+      "seconds": 105.27,
+      "check": "tests-utc-compatibility",
+      "original_log": "backtrader-tests-utc-compatibility.log",
+      "log_sha256": "5cfddb5dd7066845c5b24c52e63f4a7107b63606f1d382c334fa8461de48d5f4",
+      "outcomes": [
+        "82 passed in 104.41s (0:01:44)"
+      ]
+    },
+    {
+      "command": "uv run --no-sync python -c import sys,importlib.metadata,json; print(sys.version); print(json.dumps({d.metadata[\"Name\"]: d.version for d in importlib.metadata.distributions()},indent=2,sort_keys=True))",
+      "exit_code": 0,
+      "seconds": 0.13,
+      "check": "versions-final",
+      "original_log": "backtrader-versions-final.log",
+      "log_sha256": "bed3be0a7b23e9c4dd8a00f144b1960c70c1f2dfa60be471a5485eb3b33cfbc7",
+      "outcomes": []
+    },
+    {
+      "command": "uv sync --all-extras --all-groups --python 3.15 --no-build --no-install-project",
+      "exit_code": 0,
+      "seconds": 0.08,
+      "check": "wheel-probe-3.15",
+      "original_log": "backtrader-wheel-probe-3.15.log",
+      "log_sha256": "fc6798ed863cea4e8172e9b02ac6fb522465d92617dd66ac5af45ebc5e896b59",
+      "outcomes": []
+    }
+  ],
+  "summary": {
+    "repo": "backtrader",
+    "branch": "feature/ayu_develop",
+    "blockers": [],
+    "started": "2026-10-12T00:28:32+0800",
+    "dependency_updates": [],
+    "lock": "passed",
+    "python": "3.15",
+    "sync": "passed",
+    "build": "passed",
+    "compile": "passed",
+    "tests": "passed",
+    "test_summary": "$ uv run --no-sync python -m pytest\n........................................................................ [ 87%]\n..........                                                               [100%]\n82 passed in 104.41s (0:01:44)\n",
+    "finished": "2026-10-12T00:28:39+0800",
+    "head": "1cc3fae65c117d7b456db6d5569c6079855b0ef0",
+    "notes": [
+      "Python 3.15 installs, compiles, builds and passes the complete supplied function-based pytest suite.",
+      "UTC constructors now use timezone-aware UTC and remove tzinfo to preserve the established naive-UTC public return convention.",
+      "pytest python_classes=[] avoids collecting constructor-bearing simulation helper classes; all 82 supplied test functions are still collected."
+    ],
+    "python_version": "3.15.0 (main, Oct  9 2026, 15:11:47) [Clang 22.1.3 ]",
+    "failed_attempts": [
+      {
+        "stage": "tests",
+        "details": "ationWarning: datetime.dat...\nFAILED tests/test_ind_dm.py::test_run - DeprecationWarning: datetime.datetime...\nFAILED tests/test_ind_dma.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_downmove.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_dpo.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_dv2.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_ema.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_emaenvelope.py::test_run - DeprecationWarning: datetime...\nFAILED tests/test_ind_emaosc.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_envelope.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_highest.py::test_run - DeprecationWarning: datetime.dat...\nFAILED tests/test_ind_hma.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_ichimoku.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_kama.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_kamaenvelope.py::test_run - DeprecationWarning: datetim...\nFAILED tests/test_ind_kamaosc.py::test_run - DeprecationWarning: datetime.dat...\nFAILED tests/test_ind_kst.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_lowest.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_lrsi.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_macdhisto.py::test_run - DeprecationWarning: datetime.d...\nFAILED tests/test_ind_minperiod.py::test_run - DeprecationWarning: datetime.d...\nFAILED tests/test_ind_momentum.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_momentumoscillator.py::test_run - DeprecationWarning: d...\nFAILED tests/test_ind_oscillator.py::test_run - DeprecationWarning: datetime....\nFAILED tests/test_ind_pctchange.py::test_run - DeprecationWarning: datetime.d...\nFAILED tests/test_ind_pctrank.py::test_run - DeprecationWarning: datetime.dat...\nFAILED tests/test_ind_pgo.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_ppo.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_pposhort.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_priceosc.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_rmi.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_roc.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_rsi.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_rsi_safe.py::test_run - DeprecationWarning: datetime.da...\nFAILED tests/test_ind_sma.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_smaenvelope.py::test_run - DeprecationWarning: datetime...\nFAILED tests/test_ind_smaosc.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_smma.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_smmaenvelope.py::test_run - DeprecationWarning: datetim...\nFAILED tests/test_ind_smmaosc.py::test_run - DeprecationWarning: datetime.dat...\nFAILED tests/test_ind_stochastic.py::test_run - DeprecationWarning: datetime....\nFAILED tests/test_ind_stochasticfull.py::test_run - DeprecationWarning: datet...\nFAILED tests/test_ind_sumn.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_tema.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_temaenvelope.py::test_run - DeprecationWarning: datetim...\nFAILED tests/test_ind_temaosc.py::test_run - DeprecationWarning: datetime.dat...\nFAILED tests/test_ind_trix.py::test_run - DeprecationWarning: datetime.dateti...\nFAILED tests/test_ind_tsi.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_ultosc.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_upmove.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_vortex.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_williamsad.py::test_run - DeprecationWarning: datetime....\nFAILED tests/test_ind_williamsr.py::test_run - DeprecationWarning: datetime.d...\nFAILED tests/test_ind_wma.py::test_run - DeprecationWarning: datetime.datetim...\nFAILED tests/test_ind_wmaenvelope.py::test_run - DeprecationWarning: datetime...\nFAILED tests/test_ind_wmaosc.py::test_run - DeprecationWarning: datetime.date...\nFAILED tests/test_ind_zlema.py::test_run - DeprecationWarning: datetime.datet...\nFAILED tests/test_ind_zlind.py::test_run - DeprecationWarning: datetime.datet...\nFAILED tests/test_strategy_optimized.py::test_run - DeprecationWarning: datet...\nFAILED tests/test_strategy_unoptimized.py::test_run - DeprecationWarning: dat...\nFAILED tests/test_study_fractal.py::test_run - DeprecationWarning: datetime.d...\nFAILED tests/test_writer.py::test_run - DeprecationWarning: datetime.datetime...\n76 failed, 6 passed in 3.24s\n"
+      }
+    ],
+    "unresolved_blockers": [],
+    "default_ancestry": {
+      "refs/remotes/origin/master": true
+    },
+    "merge_in_progress": false,
+    "artifact_files": [
+      "dist/.gitignore",
+      "dist/backtrader-1.9.78.123-py3-none-any.whl",
+      "dist/backtrader-1.9.78.123.tar.gz"
+    ],
+    "committed": true,
+    "pushed": false,
+    "worktree_status": "?? .DS_Store\n"
+  },
+  "note": "Full raw logs are retained in the workspace maintenance evidence, not distributed here. Hashes identify those original logs. A successful build or selected test subset does not imply a full test-suite pass. Commands containing <workspace> describe the original execution environment."
+}

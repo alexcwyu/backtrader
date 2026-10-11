@@ -75,65 +75,65 @@ table{border-collapse:collapse;width:100%;display:block;overflow-x:auto;font-siz
 <td><code>uv lock --upgrade --python 3.15</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.29</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-lock-3.15.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv sync --all-extras --all-groups --python 3.15 --no-build --no-install-project</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.08</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-wheel-probe-3.15.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv sync --all-extras --all-groups --python 3.15</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.76</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-sync-3.15.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv build --python 3.15</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1.72</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-build.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>/Users/alex/.local/share/uv/python/cpython-3.15-macos-aarch64-none/bin/python3.15 -m compileall -q src</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.13</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-compile.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv run --no-sync python -m pytest tests</code></td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">3.85</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-tests.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv run --no-sync python -m pytest</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">105.27</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-tests-utc-compatibility.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv run --no-sync python -m compileall -q src</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.13</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-compile-final.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv build --python 3.15</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1.31</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-build-final.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 <tr>
 <td><code>uv run --no-sync python -c import sys,importlib.metadata,json; print(sys.version); print(json.dumps({d.metadata["Name"]: d.version for d in importlib.metadata.distributions()},indent=2,sort_keys=True))</code></td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0.13</td>
-<td><a href="../../docs/maintenance-2026-10-12/backtrader-versions-final.log">log</a></td>
+<td><a href="maintenance/index.html">check record</a></td>
 </tr>
 </tbody>
 </table>
-<p>The versions-final log records the exact interpreter patch release and every installed dependency version. The machine-readable <a href="../../docs/maintenance-2026-10-12/backtrader-result.json">result</a> includes branch/default ancestry, status, artifacts and unresolved checks.</p>
+<p>The versions-final log records the exact interpreter patch release and every installed dependency version. The machine-readable <a href="maintenance/verification.json">verification record</a> includes branch/default ancestry, status, artifacts and unresolved checks.</p>
 <h2 id="dependency-floor-refresh">Dependency floor refresh<a class="headerlink" href="#dependency-floor-refresh" title="Permanent link">&para;</a></h2>
 <table>
 <thead>

@@ -36,18 +36,18 @@ Unsuccessful rows are retained as historical compatibility attempts; they are no
 
 | Command | Exit | Seconds | Evidence |
 |---|---:|---:|---|
-| `uv lock --upgrade --python 3.15` | 0 | 0.29 | [log](../../docs/maintenance-2026-10-12/backtrader-lock-3.15.log) |
-| `uv sync --all-extras --all-groups --python 3.15 --no-build --no-install-project` | 0 | 0.08 | [log](../../docs/maintenance-2026-10-12/backtrader-wheel-probe-3.15.log) |
-| `uv sync --all-extras --all-groups --python 3.15` | 0 | 0.76 | [log](../../docs/maintenance-2026-10-12/backtrader-sync-3.15.log) |
-| `uv build --python 3.15` | 0 | 1.72 | [log](../../docs/maintenance-2026-10-12/backtrader-build.log) |
-| `/Users/alex/.local/share/uv/python/cpython-3.15-macos-aarch64-none/bin/python3.15 -m compileall -q src` | 0 | 0.13 | [log](../../docs/maintenance-2026-10-12/backtrader-compile.log) |
-| `uv run --no-sync python -m pytest tests` | 1 | 3.85 | [log](../../docs/maintenance-2026-10-12/backtrader-tests.log) |
-| `uv run --no-sync python -m pytest` | 0 | 105.27 | [log](../../docs/maintenance-2026-10-12/backtrader-tests-utc-compatibility.log) |
-| `uv run --no-sync python -m compileall -q src` | 0 | 0.13 | [log](../../docs/maintenance-2026-10-12/backtrader-compile-final.log) |
-| `uv build --python 3.15` | 0 | 1.31 | [log](../../docs/maintenance-2026-10-12/backtrader-build-final.log) |
-| `uv run --no-sync python -c import sys,importlib.metadata,json; print(sys.version); print(json.dumps({d.metadata["Name"]: d.version for d in importlib.metadata.distributions()},indent=2,sort_keys=True))` | 0 | 0.13 | [log](../../docs/maintenance-2026-10-12/backtrader-versions-final.log) |
+| `uv lock --upgrade --python 3.15` | 0 | 0.29 | [check record](maintenance/index.html) |
+| `uv sync --all-extras --all-groups --python 3.15 --no-build --no-install-project` | 0 | 0.08 | [check record](maintenance/index.html) |
+| `uv sync --all-extras --all-groups --python 3.15` | 0 | 0.76 | [check record](maintenance/index.html) |
+| `uv build --python 3.15` | 0 | 1.72 | [check record](maintenance/index.html) |
+| `/Users/alex/.local/share/uv/python/cpython-3.15-macos-aarch64-none/bin/python3.15 -m compileall -q src` | 0 | 0.13 | [check record](maintenance/index.html) |
+| `uv run --no-sync python -m pytest tests` | 1 | 3.85 | [check record](maintenance/index.html) |
+| `uv run --no-sync python -m pytest` | 0 | 105.27 | [check record](maintenance/index.html) |
+| `uv run --no-sync python -m compileall -q src` | 0 | 0.13 | [check record](maintenance/index.html) |
+| `uv build --python 3.15` | 0 | 1.31 | [check record](maintenance/index.html) |
+| `uv run --no-sync python -c import sys,importlib.metadata,json; print(sys.version); print(json.dumps({d.metadata["Name"]: d.version for d in importlib.metadata.distributions()},indent=2,sort_keys=True))` | 0 | 0.13 | [check record](maintenance/index.html) |
 
-The versions-final log records the exact interpreter patch release and every installed dependency version. The machine-readable [result](../../docs/maintenance-2026-10-12/backtrader-result.json) includes branch/default ancestry, status, artifacts and unresolved checks.
+The versions-final log records the exact interpreter patch release and every installed dependency version. The machine-readable [verification record](maintenance/verification.json) includes branch/default ancestry, status, artifacts and unresolved checks.
 
 ## Dependency floor refresh
 

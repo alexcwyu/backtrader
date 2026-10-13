@@ -1,262 +1,200 @@
-# backtrader: development, architecture and operations
+# Backtrader: workflow, design and architecture
 
-Updated 2026-10-12 on `feature/ayu_develop`; source snapshot `6b671389478f`. This guide follows the source in this checkout and separates available interfaces from verification evidence.
+Updated: **2026-10-13**
+Reviewed Git hash: `fb7df7f35d6fd75c5f992bc60710da17bb471f7e`
+Branch: `feature/ayu_develop`
+Source diff SHA256: `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`
+Scope: **Event-driven trading engine** / Maintenance: **active**
+Languages: Python
 
-## Purpose and feature boundaries
+[HTML edition](ayu-develop.html) / [Development](development.md) / [Historical validation](validation.md) / [Full system comparison](../../docs/index.html)
 
-An event-driven backtesting and live-trading framework organized around Cerebro, line-series data, Strategy, brokers, orders, indicators, analyzers and observers.
+## Purpose and scope
 
-Line buffers and metaclasses support composable indicators and multiple feeds. Cerebro owns scheduling and notification; the broker owns cash, commissions and fills. Strategy code communicates through orders rather than mutating broker state. Analyzers summarize execution, while observers and plotting consume results.
+Coordinate feeds, strategies, simulated broker execution and broker/store integrations.
 
-## Main workflow
+## Features and support boundaries
 
-The following is the repository-specific logical workflow. Runtime execution details remain in the linked source and the validation record.
+Native = implemented here. Integration = supplied through a named host/API. Limited = material restriction. Not provided = evidenced scope exclusion. Unverified = support/absence not established. Not applicable = outside this artifact type.
+
+| Capability | Status | Implementation and limits | Source |
+|---|---|---|---|
+| Backtesting | Native | Cerebro synchronizes feeds and advances a simulated broker. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| Live execution | Integration | Live mode disables preload/runonce and routes Strategy.buy to the configured broker. Actual external broker availability is not validated. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) |
+| Paper trading | Limited | BackBroker simulates fills. Standalone live paper connectivity was not inspected. | [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| Event driven | Native | Per-feed advancement and strategy callbacks with broker/data notifications. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Vectorized | Limited | runonce can precompute indicators, but feed synchronization and order execution remain stateful. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Order management | Native | Submitted/pending queues and broker notifications. | [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| Order types | Native | Market, close, limit, stop, stop-limit and trailing execution branches. | [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| Multi venue | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Crypto | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Equities | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Futures | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Options | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Forex | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Strategy api | Native | Strategy line-iterator callbacks and broker buy method. | [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) |
+| Optimization | Native | Cerebro runs parameter combinations and may distribute optimization across local worker processes. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Machine learning | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Reinforcement learning | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Portfolio | Native | Broker cash, positions, credit interest and valuation. | [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| Risk management | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Performance analytics | Native | Strategy invokes configured analyzers and observers after its callback. | [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) |
+| Historical data | Native | PandasData loads chronological rows into engine line buffers. | [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234)) |
+| Streaming data | Integration | Feed loop handles live-data availability. Exchange/store endpoints were not validated. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Persistence | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Data pipeline | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Web ui | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Cli | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Monitoring | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+| Extension api | Native | Replace feeds, strategies, analyzers, observers and broker. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) |
+| Native acceleration | Unverified | The inspected runtime uses Python line buffers and optional multiprocessing. No native acceleration claim is established. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Distributed execution | Unverified | The inspected source does not establish this capability. This is not a claim of absence. | Not applicable to this repository scope. |
+
+## System components
+
+| Component | Responsibility | Source |
+|---|---|---|
+| Cerebro | Feed synchronization and engine lifecycle. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
+| Strategy | User strategy, sizing and notifications. | [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) |
+| BackBroker | Native simulated broker and execution policies. | [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) |
+| PandasData | Historical pandas adapter. | [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234)) |
+
+## Architecture and component boundaries
+
+The component view summarizes inspected responsibility boundaries. Arrows identify the documented API/data dependencies; this is not a deployment-readiness claim.
 
 ```mermaid
 flowchart LR
-    S0["Register feeds and strategy"]
-    S1["Start Cerebro and broker"]
-    S0 --> S1
-    S2["Advance synchronized feed lines"]
-    S1 --> S2
-    S3["Evaluate indicators and Strategy.next"]
-    S2 --> S3
-    S4["Fill and notify orders"]
-    S3 --> S4
-    S5["Collect analyzer and observer outputs"]
-    S4 --> S5
+  N0["Cerebro"]
+  N1["Strategy"]
+  N2["BackBroker"]
+  N3["PandasData"]
+  N0 -->|"Feed-next dependency. PandasData supplies _load."| N3
+  N0 -->|"Invoke strategy callbacks after broker notifications."| N1
+  N1 -->|"Configured broker.buy call. BackBroker provides simulation."| N2
 ```
 
-1. Register feeds and strategy.
-2. Start Cerebro and broker.
-3. Advance synchronized feed lines.
-4. Evaluate indicators and Strategy.next.
-5. Fill and notify orders.
-6. Collect analyzer and observer outputs.
+- Feed-next dependency. PandasData supplies _load.: [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234))
+- Invoke strategy callbacks after broker notifications.: [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498))
+- Configured broker.buy call. BackBroker provides simulation.: [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346))
 
-## Components and ownership
+## Design decisions
 
-The entry point composes the source modules below; arrows indicate review/navigation boundaries rather than a claim that every module is called in every run.
+| Decision | Rationale | Tradeoff | Evidence |
+|---|---|---|---|
+| Use line buffers and synchronized feed datetimes. | Multiple feeds and indicators share a staged callback lifecycle. | Preload/runonce are disabled for live or replay modes. | [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) |
 
-```mermaid
-flowchart TB
-    User["Application / research entry point"]
-    M0["cerebro.py"]
-    User --> M0
-    M1["strategy.py"]
-    User --> M1
-    M2["broker.py"]
-    User --> M2
-    M3["brokers/bbroker.py"]
-    User --> M3
-    M4["feed.py"]
-    User --> M4
-    M5["linebuffer.py"]
-    User --> M5
-    M6["lineiterator.py"]
-    User --> M6
-    M7["lineseries.py"]
-    User --> M7
-```
-
-| Source | Declared classes / functions | Implementation role |
-|---|---|---|
-| [src/backtrader/cerebro.py](../src/backtrader/cerebro.py) | OptReturn, Cerebro | See the public declarations and implementation linked here. |
-| [src/backtrader/strategy.py](../src/backtrader/strategy.py) | MetaStrategy, Strategy, MetaSigStrategy, SignalStrategy | See the public declarations and implementation linked here. |
-| [src/backtrader/broker.py](../src/backtrader/broker.py) | MetaBroker, BrokerBase | See the public declarations and implementation linked here. |
-| [src/backtrader/brokers/bbroker.py](../src/backtrader/brokers/bbroker.py) | BackBroker | See the public declarations and implementation linked here. |
-| [src/backtrader/feed.py](../src/backtrader/feed.py) | MetaAbstractDataBase, AbstractDataBase, DataBase, FeedBase, MetaCSVDataBase, CSVDataBase | See the public declarations and implementation linked here. |
-| [src/backtrader/linebuffer.py](../src/backtrader/linebuffer.py) | LineBuffer, MetaLineActions, PseudoArray, LineActions, _LineDelay, _LineForward; LineDelay, LineNum | .. module:: linebuffer |
-| [src/backtrader/lineiterator.py](../src/backtrader/lineiterator.py) | MetaLineIterator, LineIterator, DataAccessor, IndicatorBase, ObserverBase, StrategyBase; LinesCoupler | See the public declarations and implementation linked here. |
-| [src/backtrader/lineseries.py](../src/backtrader/lineseries.py) | LineAlias, Lines, MetaLineSeries, LineSeries, LineSeriesStub; LineSeriesMaker | .. module:: lineroot |
-| [src/backtrader/order.py](../src/backtrader/order.py) | OrderExecutionBit, OrderData, OrderBase, Order, BuyOrder, StopBuyOrder | See the public declarations and implementation linked here. |
-| [src/backtrader/trade.py](../src/backtrader/trade.py) | TradeHistory, Trade | See the public declarations and implementation linked here. |
-| [src/backtrader/analyzer.py](../src/backtrader/analyzer.py) | MetaAnalyzer, Analyzer, MetaTimeFrameAnalyzerBase, TimeFrameAnalyzerBase | See the public declarations and implementation linked here. |
-| [src/backtrader/observer.py](../src/backtrader/observer.py) | MetaObserver, Observer | See the public declarations and implementation linked here. |
-| [src/backtrader/sizer.py](../src/backtrader/sizer.py) | Sizer | See the public declarations and implementation linked here. |
-| [src/backtrader/feeds/pandafeed.py](../src/backtrader/feeds/pandafeed.py) | PandasDirectData, PandasData | See the public declarations and implementation linked here. |
-
-## Class design
-
-Methods and inheritance edges are taken from the selected declarations in the actual source. A missing edge means composition or an external base is not asserted here.
+## Class and interface relationships
 
 ```mermaid
 classDiagram
-    class Cerebro {
-        +__init__()
-        +iterize()
-        +set_fund_history()
-        +add_order_history()
-        +notify_timer()
-    }
-    class Strategy {
-        +qbuffer()
-        +prenext_open()
-        +nextstart_open()
-        +next_open()
-        +start()
-    }
-    class BrokerBase {
-        +__init__()
-        +init()
-        +start()
-        +stop()
-        +add_order_history()
-    }
-    class BackBroker {
-        +__init__()
-        +init()
-        +get_notification()
-        +set_fundmode()
-        +get_fundmode()
-    }
-    BrokerBase <|-- BackBroker
-    class Order {
-        +execute()
-        +expire()
-        +trailadjust()
-    }
-    class Trade {
-        +__init__()
-        +getdataname()
-        +open_datetime()
-        +close_datetime()
-        +update()
-    }
+  class N0["Cerebro"] {
+    <<class>>
+    +run()
+    +_runnext()
+  }
+  class N1["Strategy"] {
+    <<class>>
+    +buy()
+    +_next()
+  }
+  class N2["BackBroker"] {
+    <<class>>
+    +_try_exec()
+    +next()
+  }
+  class N3["PandasData"] {
+    <<class>>
+    +_load()
+  }
+  N0 ..> N1 : Engine calls strategy callbacks.
+  N1 ..> N2 : Configured broker provides buy execution. BackBroker is one broker choice.
 ```
 
-## End-to-end interaction
+Each node is a reviewed source symbol. Function/module nodes are explicitly labeled; they do not imply Python classes. Only reviewed relationships are drawn.
 
-This sequence presents the responsibilities of the main workflow, including the state/result boundary. The linked classes and functions provide the exact method-level contract.
+- **Cerebro** (class): [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498))
+- **Strategy** (class): [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346))
+- **BackBroker** (class): [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176))
+- **PandasData** (class): [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234))
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant Entry as Register feeds and strategy
-    participant Process as Advance synchronized feed lines
-    participant State as Fill and notify orders
-    participant Output as Collect analyzer and observer outputs
-    User->>Entry: Supply configuration and inputs
-    Entry->>Process: Start Cerebro and broker
-    Process->>State: Evaluate indicators and Strategy.next
-    State-->>Process: Updated execution / calculation state
-    Process->>Output: Produce results
-    Output-->>User: Report outcomes
-```
+## Workflow
 
-## Source dependency direction
+### Representative source-backed flow
 
-These edges are actual explicit imports between the selected source modules. Dynamic imports, re-exports and third-party internals are omitted.
-
-```mermaid
-flowchart LR
-    I0["cerebro"]
-    I1["strategy"]
-    I2["broker"]
-    I3["bbroker"]
-    I4["feed"]
-    I5["linebuffer"]
-    I6["lineiterator"]
-    I7["lineseries"]
-    I8["order"]
-    I9["trade"]
-    I3 --> I8
-```
-
-## Design details and extension points
-
-### `Cerebro`
-
-Source: [src/backtrader/cerebro.py](../src/backtrader/cerebro.py).
-
-Params:
-
-- `iterize`: Handy function which turns things into things that can be iterated upon including iterables
-- `set_fund_history`: Add a history of orders to be directly executed in the broker for performance evaluation
-- `add_order_history`: Add a history of orders to be directly executed in the broker for performance evaluation
-- `notify_timer`: Receives a timer notification where ``timer`` is the timer which was returned by ``add_timer``, and ``when`` is the calling time. ``args`` and ``kwargs`` are any additional arguments passed to ``add_timer``
-- `add_timer`: Schedules a timer to invoke ``notify_timer``
-
-### `Strategy`
-
-Source: [src/backtrader/strategy.py](../src/backtrader/strategy.py).
-
-Base class to be subclassed for user defined strategies.
-
-- `qbuffer`: Enable the memory saving schemes. Possible values for ``savemem``:
-- `prenext_open`: See implementation for the complete contract.
-- `nextstart_open`: See implementation for the complete contract.
-- `next_open`: See implementation for the complete contract.
-- `start`: Called right before the backtesting is about to be started.
-
-### `BrokerBase`
-
-Source: [src/backtrader/broker.py](../src/backtrader/broker.py).
-
-The class contract is defined by its linked implementation.
-
-- `init`: See implementation for the complete contract.
-- `start`: See implementation for the complete contract.
-- `stop`: See implementation for the complete contract.
-- `add_order_history`: Add order history. See cerebro for details
-- `set_fund_history`: Add fund history. See cerebro for details
-
-### `BackBroker`
-
-Source: [src/backtrader/brokers/bbroker.py](../src/backtrader/brokers/bbroker.py).
-
-Broker Simulator
-
-- `init`: See implementation for the complete contract.
-- `get_notification`: See implementation for the complete contract.
-- `set_fundmode`: Set the actual fundmode (True or False)
-- `get_fundmode`: Returns the actual fundmode (True or False)
-- `set_fundstartval`: Set the starting value of the fund-like performance tracker
-
-### `Order`
-
-Source: [src/backtrader/order.py](../src/backtrader/order.py).
-
-Class which holds creation/execution data and type of oder.
-
-- `execute`: See implementation for the complete contract.
-- `expire`: See implementation for the complete contract.
-- `trailadjust`: See implementation for the complete contract.
-
-### `Trade`
-
-Source: [src/backtrader/trade.py](../src/backtrader/trade.py).
-
-Keeps track of the life of an trade: size, price,
-commission (and value?)
-
-- `getdataname`: Shortcut to retrieve the name of the data this trade references
-- `open_datetime`: Returns a datetime.datetime object with the datetime in which the trade was opened
-- `close_datetime`: Returns a datetime.datetime object with the datetime in which the trade was closed
-- `update`: Updates the current trade. The logic does not check if the trade is reversed, which is not conceptually supported by the object.
-
-## Repository layout and resources
-
-Installable packages live under `src/`. `pyproject.toml` defines package metadata, build requirements, optional integrations and development dependencies; `uv.lock` records resolved versions, and `.python-version` selects the local interpreter. This layout keeps an accidental checkout import from substituting for the installed wheel. Package resources remain beside their owning modules and are included by the build backend. Existing upstream examples, fixtures, scripts and documentation retain their separate roles.
-
-## Maintenance compatibility and evidence
-
-- Python 3.15 installs, compiles, builds and passes the complete supplied function-based pytest suite.
-- UTC constructors now use timezone-aware UTC and remove tzinfo to preserve the established naive-UTC public return convention.
-- pytest python_classes=[] avoids collecting constructor-bearing simulation helper classes; all 82 supplied test functions are still collected.
-
-## Development and verification workflow
+The steps describe the inspected implementation. User configuration and data inputs are external prerequisites.
 
 ```mermaid
 flowchart TD
-    Checkout["feature/ayu_develop"] --> Lock["uv lock --upgrade"]
-    Lock --> Sync["uv sync --frozen --all-extras --all-groups"]
-    Sync --> Compile["python -m compileall src"]
-    Sync --> Test["Existing complete test suite"]
-    Compile --> Build["uv build wheel and sdist"]
-    Test --> Evidence["Record exact exits and blockers"]
-    Build --> Evidence
-    Evidence --> Review["Review documentation and commit"]
+  W0["Configure feeds and strategies, then resolve engine run mode."]
+  W1["Advance pandas rows into data lines."]
+  W0 --> W1
+  W2["Process queued orders and update broker state."]
+  W1 --> W2
+  W3["Run strategy, analyzers and observers."]
+  W2 --> W3
 ```
 
-See [development commands](development.md) and [validation evidence](validation.md) for interpreter selection, dependency exceptions, full-suite results and remaining blockers. No additional test cases were introduced by this maintenance.
+1. Configure feeds and strategies, then resolve engine run mode.. [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498))
+2. Advance pandas rows into data lines.. [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234))
+3. Process queued orders and update broker state.. [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176))
+4. Run strategy, analyzers and observers.. [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346))
+
+## Sequence
+
+Representative calls and data dependencies
+
+Messages represent inspected calls or explicitly labelled data dependencies. A data dependency is not an asserted direct runtime call.
+
+```mermaid
+sequenceDiagram
+  participant N0 as Cerebro
+  participant N1 as Strategy
+  participant N2 as BackBroker
+  participant N3 as PandasData
+  N0->>N3: Feed-next dependency. PandasData supplies _load.
+  N0->>N1: Invoke strategy callbacks after broker notifications.
+  N1->>N2: Configured broker.buy call. BackBroker provides simulation.
+```
+
+- Feed-next dependency. PandasData supplies _load.: [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) / [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234))
+- Invoke strategy callbacks after broker notifications.: [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) / [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498))
+- Configured broker.buy call. BackBroker provides simulation.: [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346))
+
+## Strengths and limits
+
+### Strengths
+
+- A single strategy API can target a simulator or configured broker. [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) / [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) / [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176))
+
+### Limitations
+
+- Historical fills use OHLC matching and configured slippage. They are not exchange matching-engine replay. [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) / [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176))
+
+## Validation scope
+
+The linked validation and command records preserve actual historical runs and user-authorized exclusions. This source/document review does not rerun application tests, establish live trading readiness or rank benchmark performance. Current data, credential and runtime prerequisites remain material.
+
+[Repository validation](validation.md) / [Executed checks](maintenance/index.md)
+
+## Source map
+
+| Reviewed symbol/path | Inspected responsibility | Actual file SHA256 |
+|---|---|---|
+| [Cerebro.run](../src/backtrader/cerebro.py) ([L1030](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1030)) | Resolves preload/runonce/live flags, dispatches strategy runs and uses multiprocessing for optimization. | `a335769013a76051fb99507a80d227bebba7cac322b553ff8d952ea86245cd13` |
+| [Cerebro._runnext](../src/backtrader/cerebro.py) ([L1498](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/cerebro.py#L1498)) | Advances and synchronizes feeds by datetime, issues broker notifications and invokes strategies. | `a335769013a76051fb99507a80d227bebba7cac322b553ff8d952ea86245cd13` |
+| [Strategy.buy](../src/backtrader/strategy.py) ([L774](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L774)) | Calls the configured broker.buy using sizing, execution type, price, validity, bracket and OCO arguments. | `8a56ebc1d7a597c41f20bd35d83b07fde90da60df50be46b3fc3bab85ab21d18` |
+| [Strategy._next](../src/backtrader/strategy.py) ([L346](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/strategy.py#L346)) | Runs the inherited line iterator callback then analyzers and observers. | `8a56ebc1d7a597c41f20bd35d83b07fde90da60df50be46b3fc3bab85ab21d18` |
+| [BackBroker._try_exec](../src/backtrader/brokers/bbroker.py) ([L1040](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1040)) | Branches by order execution type into market, close, limit, stop, stop-limit and trailing handlers. | `0fd397a72814f0de31fcd318b4a1da2030412ae9bea426c0d5dcdd001a52965e` |
+| [BackBroker.next](../src/backtrader/brokers/bbroker.py) ([L1176](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/brokers/bbroker.py#L1176)) | Checks submitted orders, advances pending orders, charges credit interest and updates value. | `0fd397a72814f0de31fcd318b4a1da2030412ae9bea426c0d5dcdd001a52965e` |
+| [PandasData._load](../src/backtrader/feeds/pandafeed.py) ([L234](https://github.com/alexcwyu/backtrader/blob/fb7df7f35d6fd75c5f992bc60710da17bb471f7e/src/backtrader/feeds/pandafeed.py#L234)) | Reads the next pandas row into line buffers and converts index or datetime column to Backtrader numeric date. | `6dda2fc5bb339ea6f4e68c2bf54597e2383969532c23437cf8b06a6906d73ff3` |
+
+## Documentation provenance
+
+Review date: 2026-10-13. Full committed source HEAD: `fb7df7f35d6fd75c5f992bc60710da17bb471f7e`. Template version: 2. 4 source files were independently hashed for this guide.
+
+[Evidence catalog](../../docs/systems-2026-10-13/catalog.json) / [Standard template](../../docs/guidelines/APP_TEMPLATE.md)
+
+- Snapshot provenance: inventory.json full HEAD fb7df7f35d6fd75c5f992bc60710da17bb471f7e, branch feature/ayu_develop. Source was inspected in the existing checkout and no repository files were changed.
+- Inspected implementation bodies and existing architecture documentation. This is a representative static source audit, not a runtime or live-service validation. Credential exclusions in current validation are policy, not evidence that a live connection succeeds.
+- Inspected source files: src/backtrader/cerebro.py, src/backtrader/strategy.py, src/backtrader/brokers/bbroker.py, src/backtrader/feeds/pandafeed.py

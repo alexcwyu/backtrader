@@ -1,19 +1,12 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Current uv development workflow</title><style>
-:root{color-scheme:light dark;--bg:#f6f8fa;--paper:#fff;--fg:#182332;--muted:#526274;--line:#d9e0e7;--accent:#1769aa}
-@media(prefers-color-scheme:dark){:root{--bg:#111820;--paper:#192330;--fg:#e6edf3;--muted:#a0b3c5;--line:#344354;--accent:#71b7ee}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,sans-serif}
-header{border-bottom:1px solid var(--line);padding:16px max(24px,calc((100vw - 1120px)/2));background:var(--paper);font-size:14px}
-main{max-width:1120px;margin:32px auto;padding:40px 48px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
-h1,h2,h3,h4{line-height:1.3;scroll-margin-top:24px}h1{font-size:2.1rem}h2{margin-top:2.5em;border-bottom:1px solid var(--line);padding-bottom:.35em}h3{margin-top:1.8em}
-a{color:var(--accent);text-underline-offset:3px}code{font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border-radius:4px;padding:2px 5px}pre{overflow:auto;border:1px solid var(--line);background:var(--bg);padding:16px;border-radius:7px}pre code{padding:0;background:none}
-table{border-collapse:collapse;width:100%;display:block;overflow-x:auto;font-size:14px}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left}th{background:var(--bg)}blockquote{border-left:4px solid var(--accent);margin:16px 0;padding:4px 20px;color:var(--muted)}
-.diagram{overflow-x:auto;margin:24px 0;padding:20px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#182332}.mermaid{border:0;background:none;text-align:center}.mermaid svg{height:auto;max-width:100%}details{font-size:13px;color:#526274}.headerlink{margin-left:.4em;font-size:.7em;text-decoration:none;color:var(--muted)}
-@media(max-width:740px){main{margin:0;padding:24px 18px;border:0;border-radius:0}h1{font-size:1.7rem}.diagram{padding:8px}}
-@media print{header,details,.headerlink{display:none}body,main{background:#fff;color:#000;border:0;margin:0;padding:0}a{color:#000}.diagram,pre{break-inside:avoid}}
-</style></head><body><header>Engineering documentation · <a href="development.md">Markdown source</a></header><main><!-- ayu-maintenance-2026-10-12 -->
-<h1 id="current-uv-development-workflow">Current uv development workflow<a class="headerlink" href="#current-uv-development-workflow" title="Permanent link">&para;</a></h1>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Current uv development workflow</title><style>html{color-scheme:light dark}body{margin:0;background:#f5f7fa;color:#172333;font:16px/1.7 system-ui,sans-serif}main{max-width:1120px;margin:28px auto;background:white;padding:40px;border:1px solid #dbe2ea;border-radius:10px}h1,h2,h3{line-height:1.25}h2{margin-top:2em;border-bottom:1px solid #dbe2ea;padding-bottom:.4em}a{color:#1769aa}pre{overflow:auto;padding:16px;background:#f5f7fa;border:1px solid #dbe2ea;border-radius:6px}code{font:14px/1.6 ui-monospace,monospace}table{border-collapse:collapse;display:block;overflow:auto}th,td{border:1px solid #dbe2ea;padding:8px 12px;text-align:left;vertical-align:top}blockquote{margin-left:0;border-left:4px solid #1769aa;padding-left:18px}@media(max-width:700px){main{margin:8px;padding:18px}body{font-size:15px}}@media(prefers-color-scheme:dark){body{background:#111820;color:#e7edf5}main{background:#192330;border-color:#344354}pre{background:#111820}a{color:#78b9ef}th,td,h2,pre{border-color:#344354}}@media print{main{margin:0;border:0;padding:0}a{color:inherit}pre,table{overflow:visible}}.diagram{background:#fff;color:#172333;padding:12px;border:1px solid #dbe2ea;border-radius:6px;overflow:auto}</style></head><body><main><!-- ayu-maintenance-2026-10-12 -->
+
+<!-- current-documentation-provenance -->
+<p>Documentation reviewed: 2026-10-13 · Git source base: <code>fb7df7f35d6fd75c5f992bc60710da17bb471f7e</code> · <a href="ayu-develop.md">Current architecture and feature guide</a>.
+Historical execution commands/results below retain their original dates and scope; this metadata update is not a new application test run.</p>
+<!-- /current-documentation-provenance -->
+
+<h1 id="current-uv-development-workflow">Current uv development workflow</h1>
 <p>The maintained branch is <code>feature/ayu_develop</code>. The selected interpreter is Python <code>3.15</code>; <code>requires-python</code> records the range that was actually resolved. Python 3.15 was attempted first. Dependency/native-wheel failures and fallback evidence are recorded in <a href="validation.md">validation.md</a>.</p>
 <pre><code class="language-sh">export UV_PYTHON_PREFERENCE=only-managed
 uv python install 3.15
@@ -27,15 +20,15 @@ uv run --no-sync python -m pytest
 <p>The <code>src/</code> layout and build-backend package discovery preserve public import names. Wheel/sdist resources include the source-associated data and templates. Optional vendor SDKs, live credentials, databases and graphical/native libraries retain their original runtime requirements. Examples and test fixtures are not promoted into the library API.</p>
 <!-- prior-development-notes -->
 
-<h2 id="compatibility-decisions">Compatibility decisions<a class="headerlink" href="#compatibility-decisions" title="Permanent link">&para;</a></h2>
+<h2 id="compatibility-decisions">Compatibility decisions</h2>
 <ul>
 <li>Python 3.15 installs, compiles, builds and passes the complete supplied function-based pytest suite.</li>
 <li>UTC constructors now use timezone-aware UTC and remove tzinfo to preserve the established naive-UTC public return convention.</li>
 <li>pytest python_classes=[] avoids collecting constructor-bearing simulation helper classes; all 82 supplied test functions are still collected.</li>
 </ul>
-<h1 id="backtrader-development-guide">Backtrader -- Development Guide<a class="headerlink" href="#backtrader-development-guide" title="Permanent link">&para;</a></h1>
-<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<h1 id="backtrader-development-guide">Backtrader -- Development Guide</h1>
+<h2 id="setup">Setup</h2>
+<h3 id="installation">Installation</h3>
 <pre><code class="language-bash"># From PyPI
 pip install backtrader
 
@@ -49,13 +42,13 @@ pip install backtrader[plotting]
 # or
 pip install matplotlib
 </code></pre>
-<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
+<h3 id="requirements">Requirements</h3>
 <ul>
 <li><strong>Python</strong>: 3.x</li>
 <li><strong>Core</strong>: No mandatory external dependencies (pure Python)</li>
 <li><strong>Optional</strong>: matplotlib (plotting), pytz (timezone), TA-Lib (indicators)</li>
 </ul>
-<h2 id="project-structure">Project Structure<a class="headerlink" href="#project-structure" title="Permanent link">&para;</a></h2>
+<h2 id="project-structure">Project Structure</h2>
 <pre><code>backtrader/
   src/backtrader/
     __init__.py          # Package imports and re-exports
@@ -126,8 +119,8 @@ pip install matplotlib
     plot/                # Matplotlib plotting
     btrun/               # Command-line runner
 </code></pre>
-<h2 id="strategy-creation-guide">Strategy Creation Guide<a class="headerlink" href="#strategy-creation-guide" title="Permanent link">&para;</a></h2>
-<h3 id="basic-strategy">Basic Strategy<a class="headerlink" href="#basic-strategy" title="Permanent link">&para;</a></h3>
+<h2 id="strategy-creation-guide">Strategy Creation Guide</h2>
+<h3 id="basic-strategy">Basic Strategy</h3>
 <pre><code class="language-python">import backtrader as bt
 
 class SmaCross(bt.Strategy):
@@ -158,7 +151,7 @@ cerebro.broker.setcommission(commission=0.001)
 cerebro.run()
 cerebro.plot()
 </code></pre>
-<h3 id="strategy-with-order-management">Strategy with Order Management<a class="headerlink" href="#strategy-with-order-management" title="Permanent link">&para;</a></h3>
+<h3 id="strategy-with-order-management">Strategy with Order Management</h3>
 <pre><code class="language-python">class ManagedStrategy(bt.Strategy):
     params = (('period', 20),)
 
@@ -195,7 +188,7 @@ cerebro.plot()
         dt = self.data.datetime.date(0)
         print(f'{dt}: {txt}')
 </code></pre>
-<h3 id="bracket-orders-sltp">Bracket Orders (SL/TP)<a class="headerlink" href="#bracket-orders-sltp" title="Permanent link">&para;</a></h3>
+<h3 id="bracket-orders-sltp">Bracket Orders (SL/TP)</h3>
 <pre><code class="language-python">class BracketStrategy(bt.Strategy):
     def next(self):
         if not self.position and self.buy_signal():
@@ -209,7 +202,7 @@ cerebro.plot()
     def buy_signal(self):
         return self.data.close[0] &gt; self.data.close[-1]
 </code></pre>
-<h3 id="multi-data-strategy">Multi-Data Strategy<a class="headerlink" href="#multi-data-strategy" title="Permanent link">&para;</a></h3>
+<h3 id="multi-data-strategy">Multi-Data Strategy</h3>
 <pre><code class="language-python">class PairsStrategy(bt.Strategy):
     def __init__(self):
         # self.data0 and self.data1 are the two data feeds
@@ -227,8 +220,8 @@ cerebro.plot()
             self.close(data=self.data0)
             self.close(data=self.data1)
 </code></pre>
-<h2 id="custom-indicator-development">Custom Indicator Development<a class="headerlink" href="#custom-indicator-development" title="Permanent link">&para;</a></h2>
-<h3 id="basic-custom-indicator">Basic Custom Indicator<a class="headerlink" href="#basic-custom-indicator" title="Permanent link">&para;</a></h3>
+<h2 id="custom-indicator-development">Custom Indicator Development</h2>
+<h3 id="basic-custom-indicator">Basic Custom Indicator</h3>
 <pre><code class="language-python">class MyIndicator(bt.Indicator):
     lines = ('myline',)  # Declare output lines
     params = (('period', 20),)
@@ -243,7 +236,7 @@ cerebro.plot()
     # def next(self):
     #     self.lines.myline[0] = sum(self.data.close.get(size=self.p.period)) / self.p.period
 </code></pre>
-<h3 id="multi-line-indicator">Multi-Line Indicator<a class="headerlink" href="#multi-line-indicator" title="Permanent link">&para;</a></h3>
+<h3 id="multi-line-indicator">Multi-Line Indicator</h3>
 <pre><code class="language-python">class BollingerBands(bt.Indicator):
     lines = ('mid', 'top', 'bot',)
     params = (('period', 20), ('devfactor', 2.0),)
@@ -256,7 +249,7 @@ cerebro.plot()
         self.lines.top = self.lines.mid + self.p.devfactor * stddev
         self.lines.bot = self.lines.mid - self.p.devfactor * stddev
 </code></pre>
-<h3 id="using-ta-lib-indicators">Using TA-Lib Indicators<a class="headerlink" href="#using-ta-lib-indicators" title="Permanent link">&para;</a></h3>
+<h3 id="using-ta-lib-indicators">Using TA-Lib Indicators</h3>
 <pre><code class="language-python">import backtrader.talib as btta
 
 class TALibStrategy(bt.Strategy):
@@ -264,8 +257,8 @@ class TALibStrategy(bt.Strategy):
         self.rsi = btta.RSI(self.data.close, timeperiod=14)
         self.macd, self.signal, self.hist = btta.MACD(self.data.close)
 </code></pre>
-<h2 id="data-source-integration">Data Source Integration<a class="headerlink" href="#data-source-integration" title="Permanent link">&para;</a></h2>
-<h3 id="generic-csv">Generic CSV<a class="headerlink" href="#generic-csv" title="Permanent link">&para;</a></h3>
+<h2 id="data-source-integration">Data Source Integration</h2>
+<h3 id="generic-csv">Generic CSV</h3>
 <pre><code class="language-python">data = bt.feeds.GenericCSVData(
     dataname='mydata.csv',
     dtformat='%Y-%m-%d',
@@ -275,14 +268,14 @@ class TALibStrategy(bt.Strategy):
     todate=datetime.datetime(2024, 1, 1),
 )
 </code></pre>
-<h3 id="pandas-dataframe">pandas DataFrame<a class="headerlink" href="#pandas-dataframe" title="Permanent link">&para;</a></h3>
+<h3 id="pandas-dataframe">pandas DataFrame</h3>
 <pre><code class="language-python">import pandas as pd
 
 df = pd.read_csv('data.csv', index_col='Date', parse_dates=True)
 data = bt.feeds.PandasData(dataname=df)
 cerebro.adddata(data)
 </code></pre>
-<h3 id="interactive-brokers-live">Interactive Brokers (Live)<a class="headerlink" href="#interactive-brokers-live" title="Permanent link">&para;</a></h3>
+<h3 id="interactive-brokers-live">Interactive Brokers (Live)</h3>
 <pre><code class="language-python">store = bt.stores.IBStore(host='127.0.0.1', port=7497, clientId=1)
 cerebro.broker = store.getbroker()
 
@@ -295,7 +288,7 @@ data = store.getdata(
 )
 cerebro.adddata(data)
 </code></pre>
-<h3 id="resampling-and-replaying">Resampling and Replaying<a class="headerlink" href="#resampling-and-replaying" title="Permanent link">&para;</a></h3>
+<h3 id="resampling-and-replaying">Resampling and Replaying</h3>
 <pre><code class="language-python"># Resample intraday to daily
 data0 = bt.feeds.GenericCSVData(dataname='1min_data.csv')
 cerebro.adddata(data0)
@@ -305,8 +298,8 @@ cerebro.resampledata(data0, timeframe=bt.TimeFrame.Days)
 # or replay (builds bars incrementally)
 cerebro.replaydata(data0, timeframe=bt.TimeFrame.Days)
 </code></pre>
-<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<h3 id="manual-testing">Manual Testing<a class="headerlink" href="#manual-testing" title="Permanent link">&para;</a></h3>
+<h2 id="testing">Testing</h2>
+<h3 id="manual-testing">Manual Testing</h3>
 <pre><code class="language-python"># Quick test with built-in sample
 cerebro = bt.Cerebro()
 data = bt.feeds.YahooFinanceCSVData(dataname='sample_data.csv')
@@ -326,7 +319,7 @@ print('Sharpe:', strat.analyzers.sharpe.get_analysis())
 print('DrawDown:', strat.analyzers.drawdown.get_analysis())
 print('Trades:', strat.analyzers.trades.get_analysis())
 </code></pre>
-<h3 id="debugging-strategies">Debugging Strategies<a class="headerlink" href="#debugging-strategies" title="Permanent link">&para;</a></h3>
+<h3 id="debugging-strategies">Debugging Strategies</h3>
 <pre><code class="language-python">class DebugStrategy(bt.Strategy):
     def next(self):
         # Log current state
@@ -339,12 +332,12 @@ print('Trades:', strat.analyzers.trades.get_analysis())
         dt = self.data.datetime.date(0)
         print(f'{dt}: {txt}')
 </code></pre>
-<h3 id="command-line-runner">Command-Line Runner<a class="headerlink" href="#command-line-runner" title="Permanent link">&para;</a></h3>
+<h3 id="command-line-runner">Command-Line Runner</h3>
 <p>Backtrader includes <code>btrun</code> for running strategies without writing a script:</p>
 <pre><code class="language-bash">btrun --data mydata.csv --strategy MyModule:MyStrategy --cash 100000
 </code></pre>
-<h2 id="common-patterns">Common Patterns<a class="headerlink" href="#common-patterns" title="Permanent link">&para;</a></h2>
-<h3 id="custom-commission-scheme">Custom Commission Scheme<a class="headerlink" href="#custom-commission-scheme" title="Permanent link">&para;</a></h3>
+<h2 id="common-patterns">Common Patterns</h2>
+<h3 id="custom-commission-scheme">Custom Commission Scheme</h3>
 <pre><code class="language-python">class FixedCommission(bt.CommInfoBase):
     params = (('commission', 10), ('stocklike', True),)
 
@@ -353,7 +346,7 @@ print('Trades:', strat.analyzers.trades.get_analysis())
 
 cerebro.broker.addcommissioninfo(FixedCommission())
 </code></pre>
-<h3 id="custom-sizer">Custom Sizer<a class="headerlink" href="#custom-sizer" title="Permanent link">&para;</a></h3>
+<h3 id="custom-sizer">Custom Sizer</h3>
 <pre><code class="language-python">class PercentSizer(bt.Sizer):
     params = (('percents', 10),)
 
@@ -366,7 +359,7 @@ cerebro.broker.addcommissioninfo(FixedCommission())
 
 cerebro.addsizer(PercentSizer, percents=25)
 </code></pre>
-<h3 id="timer-based-execution">Timer-Based Execution<a class="headerlink" href="#timer-based-execution" title="Permanent link">&para;</a></h3>
+<h3 id="timer-based-execution">Timer-Based Execution</h3>
 <pre><code class="language-python">class TimerStrategy(bt.Strategy):
     def __init__(self):
         self.add_timer(
@@ -378,8 +371,8 @@ cerebro.addsizer(PercentSizer, percents=25)
         # Called 30 minutes after session start
         self.rebalance()
 </code></pre>
-<h2 id="configuration-reference">Configuration Reference<a class="headerlink" href="#configuration-reference" title="Permanent link">&para;</a></h2>
-<h3 id="cerebro-parameters">Cerebro Parameters<a class="headerlink" href="#cerebro-parameters" title="Permanent link">&para;</a></h3>
+<h2 id="configuration-reference">Configuration Reference</h2>
+<h3 id="cerebro-parameters">Cerebro Parameters</h3>
 <table>
 <thead>
 <tr>
@@ -500,7 +493,7 @@ cerebro.addsizer(PercentSizer, percents=25)
 </tr>
 </tbody>
 </table>
-<h3 id="backbroker-default-broker-parameters">BackBroker (Default Broker) Parameters<a class="headerlink" href="#backbroker-default-broker-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="backbroker-default-broker-parameters">BackBroker (Default Broker) Parameters</h3>
 <table>
 <thead>
 <tr>
@@ -615,7 +608,7 @@ cerebro.addsizer(PercentSizer, percents=25)
 </tr>
 </tbody>
 </table>
-<h3 id="pandasdata-feed-parameters">PandasData Feed Parameters<a class="headerlink" href="#pandasdata-feed-parameters" title="Permanent link">&para;</a></h3>
+<h3 id="pandasdata-feed-parameters">PandasData Feed Parameters</h3>
 <table>
 <thead>
 <tr>
@@ -688,75 +681,72 @@ cerebro.addsizer(PercentSizer, percents=25)
 </tr>
 </tbody>
 </table>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="1-importerror-no-module-named-backtrader">1. <code>ImportError: No module named 'backtrader'</code><a class="headerlink" href="#1-importerror-no-module-named-backtrader" title="Permanent link">&para;</a></h3>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="1-importerror-no-module-named-backtrader">1. <code>ImportError: No module named 'backtrader'</code></h3>
 <p><strong>Cause</strong>: Package not installed or installed in a different Python environment.
 <strong>Fix</strong>: Run <code>pip install backtrader</code> in the correct virtual environment. For development, use <code>pip install -e .</code> from the repo root.</p>
-<h3 id="2-strategy-next-is-never-called">2. Strategy <code>next()</code> is never called<a class="headerlink" href="#2-strategy-next-is-never-called" title="Permanent link">&para;</a></h3>
+<h3 id="2-strategy-next-is-never-called">2. Strategy <code>next()</code> is never called</h3>
 <p><strong>Cause</strong>: Indicators have minimum period requirements. Until all indicators have enough data, only <code>prenext()</code> is called.
 <strong>Fix</strong>: Check your indicator periods. Override <code>prenext()</code> to log warmup progress: <code>def prenext(self): print(f'Warming up: {len(self)}')</code>. Ensure your data has more bars than your longest indicator period.</p>
-<h3 id="3-orders-rejected-with-margin-status">3. Orders rejected with <code>Margin</code> status<a class="headerlink" href="#3-orders-rejected-with-margin-status" title="Permanent link">&para;</a></h3>
+<h3 id="3-orders-rejected-with-margin-status">3. Orders rejected with <code>Margin</code> status</h3>
 <p><strong>Cause</strong>: Insufficient cash or margin to place the order.
 <strong>Fix</strong>: Check <code>self.broker.getcash()</code> before ordering. Reduce position size, increase initial capital with <code>cerebro.broker.setcash()</code>, or use a custom sizer that accounts for available margin.</p>
-<h3 id="4-attributeerror-when-accessing-selfdataclose-in-__init__">4. <code>AttributeError</code> when accessing <code>self.data.close</code> in <code>__init__</code><a class="headerlink" href="#4-attributeerror-when-accessing-selfdataclose-in-__init__" title="Permanent link">&para;</a></h3>
+<h3 id="4-attributeerror-when-accessing-selfdataclose-in-__init__">4. <code>AttributeError</code> when accessing <code>self.data.close</code> in <code>__init__</code></h3>
 <p><strong>Cause</strong>: In <code>__init__</code>, data lines are not yet populated with values. You must use them declaratively (for indicator computation), not access their scalar values.
 <strong>Fix</strong>: Access scalar values only in <code>next()</code>. In <code>__init__</code>, use lines for indicator declarations: <code>self.sma = bt.ind.SMA(self.data.close, period=20)</code>.</p>
-<h3 id="5-plotting-fails-with-modulenotfounderror-matplotlib">5. Plotting fails with <code>ModuleNotFoundError: matplotlib</code><a class="headerlink" href="#5-plotting-fails-with-modulenotfounderror-matplotlib" title="Permanent link">&para;</a></h3>
+<h3 id="5-plotting-fails-with-modulenotfounderror-matplotlib">5. Plotting fails with <code>ModuleNotFoundError: matplotlib</code></h3>
 <p><strong>Cause</strong>: matplotlib is an optional dependency not installed by default.
 <strong>Fix</strong>: Install it: <code>pip install matplotlib</code> or <code>pip install backtrader[plotting]</code>.</p>
-<h3 id="6-live-trading-connection-errors-interactive-brokers">6. Live trading connection errors (Interactive Brokers)<a class="headerlink" href="#6-live-trading-connection-errors-interactive-brokers" title="Permanent link">&para;</a></h3>
+<h3 id="6-live-trading-connection-errors-interactive-brokers">6. Live trading connection errors (Interactive Brokers)</h3>
 <p><strong>Cause</strong>: TWS or IB Gateway is not running, or the port/clientId is wrong.
 <strong>Fix</strong>: Ensure TWS/Gateway is running with API access enabled. Default port is 7497 (paper) or 7496 (live). Each connection needs a unique <code>clientId</code>.</p>
-<h3 id="7-optimization-is-very-slow">7. Optimization is very slow<a class="headerlink" href="#7-optimization-is-very-slow" title="Permanent link">&para;</a></h3>
+<h3 id="7-optimization-is-very-slow">7. Optimization is very slow</h3>
 <p><strong>Cause</strong>: Large parameter space with the default <code>maxcpus=None</code> may still be slow; <code>optreturn=False</code> or <code>optdatas=False</code> add overhead.
 <strong>Fix</strong>: Keep <code>optreturn=True</code> and <code>optdatas=True</code> (defaults). Reduce the parameter space. Set <code>maxcpus</code> to a specific number to control resource usage.</p>
-<h3 id="8-data-timezone-issues-bars-appear-at-wrong-times">8. Data timezone issues / bars appear at wrong times<a class="headerlink" href="#8-data-timezone-issues-bars-appear-at-wrong-times" title="Permanent link">&para;</a></h3>
+<h3 id="8-data-timezone-issues-bars-appear-at-wrong-times">8. Data timezone issues / bars appear at wrong times</h3>
 <p><strong>Cause</strong>: Data timestamps and the strategy timezone are misaligned.
 <strong>Fix</strong>: Set <code>tz</code> on Cerebro or on individual data feeds. Use <code>pytz</code> instances for explicit control: <code>cerebro = bt.Cerebro(tz=pytz.timezone('US/Eastern'))</code>.</p>
-<h3 id="9-next-called-with-stale-indicator-values">9. <code>next()</code> called with stale indicator values<a class="headerlink" href="#9-next-called-with-stale-indicator-values" title="Permanent link">&para;</a></h3>
+<h3 id="9-next-called-with-stale-indicator-values">9. <code>next()</code> called with stale indicator values</h3>
 <p><strong>Cause</strong>: Using <code>runonce=False</code> with indicators that expect vectorized mode, or mixing incompatible indicator types.
 <strong>Fix</strong>: Keep <code>runonce=True</code> (default) unless you have a specific reason to disable it. If you need event-driven indicator computation, implement the <code>next()</code> method on your custom indicator.</p>
-<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
-<h3 id="api-keys-and-broker-credentials">API Keys and Broker Credentials<a class="headerlink" href="#api-keys-and-broker-credentials" title="Permanent link">&para;</a></h3>
+<h2 id="security-considerations">Security Considerations</h2>
+<h3 id="api-keys-and-broker-credentials">API Keys and Broker Credentials</h3>
 <ul>
 <li>Never hardcode IB, Oanda, or other broker credentials in strategy files. Use environment variables or a dedicated secrets manager.</li>
 <li>The <code>IBStore</code> and <code>OandaStore</code> accept credentials as constructor arguments. Pass them via <code>os.environ.get()</code> rather than string literals.</li>
 </ul>
-<h3 id="live-trading-safety">Live Trading Safety<a class="headerlink" href="#live-trading-safety" title="Permanent link">&para;</a></h3>
+<h3 id="live-trading-safety">Live Trading Safety</h3>
 <ul>
 <li>Always test strategies in paper-trading mode before going live. For IB, use port 7497 (paper) instead of 7496 (live).</li>
 <li>Implement position limits and maximum order size checks in <code>notify_order()</code> to prevent runaway orders.</li>
 <li>Use <code>cerebro.broker.set_checksubmit(True)</code> (default) to verify margin/cash before order submission.</li>
 </ul>
-<h3 id="data-integrity">Data Integrity<a class="headerlink" href="#data-integrity" title="Permanent link">&para;</a></h3>
+<h3 id="data-integrity">Data Integrity</h3>
 <ul>
 <li>Validate external data feeds for NaN values, duplicate timestamps, and gaps before feeding them to Cerebro.</li>
 <li>When using live data feeds, implement reconnection logic and handle partial bars gracefully.</li>
 </ul>
-<h3 id="look-ahead-bias">Look-Ahead Bias<a class="headerlink" href="#look-ahead-bias" title="Permanent link">&para;</a></h3>
+<h3 id="look-ahead-bias">Look-Ahead Bias</h3>
 <ul>
 <li>Indicators computed in <code>__init__</code> use declarative mode and do not leak future data. However, custom <code>next()</code> logic that accesses <code>self.data.close[1]</code> (future index) will introduce look-ahead bias.</li>
 <li>Resampled data must be properly aligned. Use <code>cerebro.resampledata()</code> rather than manual resampling to ensure correct bar boundaries.</li>
 </ul>
-<h3 id="pickle-and-serialization">Pickle and Serialization<a class="headerlink" href="#pickle-and-serialization" title="Permanent link">&para;</a></h3>
+<h3 id="pickle-and-serialization">Pickle and Serialization</h3>
 <ul>
 <li>Optimization results may be pickled when using multiprocessing. Avoid storing credentials or sensitive data as strategy parameters or attributes.</li>
 <li>The <code>optreturn=True</code> setting (default) reduces the amount of data serialized between processes.</li>
 </ul>
-<h3 id="network-exposure">Network Exposure<a class="headerlink" href="#network-exposure" title="Permanent link">&para;</a></h3>
+<h3 id="network-exposure">Network Exposure</h3>
 <ul>
 <li>Live trading stores (IB, Oanda) open network connections. Ensure they run on trusted networks. Use firewalls to restrict access to broker API ports.</li>
 <li>The <code>btrun</code> command-line tool can load arbitrary Python modules. Do not run it with untrusted strategy files.</li>
 </ul>
-<hr />
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<hr>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="README.md">README</a> — Project overview and quick start</li>
 <li><a href="architecture.md">Architecture</a> — System design and components</li>
 <li><a href="workflow.md">Workflow</a> — Event flows and processing pipelines</li>
 <li><a href="state-management.md">State Management</a> — State lifecycle and data models</li>
 </ul></main>
-<script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@12.1.0/dist/mermaid.esm.min.mjs';
-mermaid.initialize({startOnLoad:true,securityLevel:'strict',theme:'default',flowchart:{useMaxWidth:true},sequence:{useMaxWidth:true}});
-</script></body></html>
+</body></html>
